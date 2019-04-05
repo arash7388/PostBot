@@ -16,7 +16,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Telerik.Web.Extensions;
+//using Telerik.Web.Extensions;
 
 namespace Common
 {
