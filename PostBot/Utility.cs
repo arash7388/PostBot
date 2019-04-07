@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Configuration;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Telegram.Bot;
@@ -84,30 +85,30 @@ namespace PostBot
         {
             try
             {
-                var filePath = @"C:\Users\Arash\documents\visual studio 2015\Projects\Instagram\PostBot\JsonMessages";
+                var jsonFilesPath = ConfigurationManager.AppSettings["JsonMessagesPath"];
 
                 switch (messageCategory)
                 {
                     case MessageCategory.ESLPod:
-                        filePath += @"\EslPodMessages.json";
+                        jsonFilesPath += @"\EslPodMessages.json";
                         break;
 
                     case MessageCategory.BBC6Min:
-                        filePath += @"\BBC6MinMessages.json";
+                        jsonFilesPath += @"\BBC6MinMessages.json";
                         break;
 
                     case MessageCategory.EngVid:
-                        filePath += @"\EngvidEmma.json";
+                        jsonFilesPath += @"\Engvid.json";
                         break;
 
                     default:
                         break;
                 }
 
-                if (!File.Exists(filePath))
-                    File.Create(filePath);
+                if (!File.Exists(jsonFilesPath))
+                    File.Create(jsonFilesPath);
 
-                var jsonData = File.ReadAllText(filePath);
+                var jsonData = File.ReadAllText(jsonFilesPath);
                 
                 var setting = new JsonSerializerSettings();
                 setting.NullValueHandling = NullValueHandling.Ignore;
@@ -118,7 +119,7 @@ namespace PostBot
                 msgList.Add(msg);
 
                 jsonData = JsonConvert.SerializeObject(msgList);
-                File.WriteAllText(filePath, jsonData);
+                File.WriteAllText(jsonFilesPath, jsonData);
             }
             catch (Exception ex)
             {

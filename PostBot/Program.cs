@@ -63,6 +63,13 @@ namespace PostBot
 
         static void Main(string[] args)
         {
+            UploadMp4AndSaveJson().GetAwaiter().GetResult();
+            Console.ReadKey();
+        }
+            static void Main3(string[] args)
+        {
+            UploadMp4AndSaveJson().GetAwaiter().GetResult();
+
             //MainAsync(args).GetAwaiter().GetResult();
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
@@ -505,6 +512,70 @@ namespace PostBot
             }
         }
 
+        static async Task UploadMp4AndSaveJson()
+        {
+            try
+            {
+                var path =ConfigurationManager.AppSettings["UploadMp4Path"];
+                DirectoryInfo mainDir = new DirectoryInfo(path);
+
+                Bot.Timeout = new TimeSpan(1, 0, 0);
+
+                //int startFrom = 199;
+
+                foreach (FileInfo file in mainDir.GetFiles().Where(a=>!a.Name.StartsWith("___")).OrderBy(a => a.Name))
+                {
+                    //var fileNameIndex = Convert.ToInt32(file.FullName.Split('\\').Last().Substring(0, 4));
+                    //if (fileNameIndex < startFrom)
+                    //{
+                    //    continue;
+                    //}
+                    //if (file.Name != "0058 - Getting Ready to Go .mp3")
+                    //    continue;
+
+                    if (file.Extension == ".mp4")
+                    {
+                        TimeSpan duration = new TimeSpan();
+
+                        var stream = File.Open(file.FullName, FileMode.Open, FileAccess.Read,
+                                FileShare.Read);
+                        
+                            InputOnlineFile inputFile = new InputOnlineFile(stream);
+                            inputFile.FileName = file.FullName.Split('\\').Last();
+                            var title = inputFile.FileName + Environment.NewLine;
+                            
+                            int k = Convert.ToInt32(inputFile.FileName.Substring(0, 1));
+                            try
+                            {
+                                var msg = await
+                                    Bot.SendVideoAsync(ChatId, inputFile, 0,0,0, title,
+                                         ParseMode.Default, true);
+                                Utility.AppendToJsonFile(msg, MessageCategory.EngVid);
+                            stream.Close();
+                            if(!File.Exists(file.FullName.Replace(file.FullName.Split('\\').Last(), "___" + file.FullName.Split('\\').Last())))
+                                System.IO.File.Move(file.FullName, file.FullName.Replace(file.FullName.Split('\\').Last(), "___" + file.FullName.Split('\\').Last()));
+                            else
+                                System.IO.File.Move(file.FullName, file.FullName.Replace(file.FullName.Split('\\').Last(), "____" + file.FullName.Split('\\').Last()));
+                        }
+                        catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error! {ex.Message}. Retrying to send video {inputFile.FileName}");
+                                await RetrySendVideo(file, k, duration, MessageCategory.ESLPod);
+                            }
+
+                            Console.WriteLine($"mp4 sent. {inputFile.FileName}");
+                        
+                    }
+                   
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error! {ex.Message}");
+            }
+        }
+
         private static void ForwardMessage()
         {
             //test 
@@ -595,6 +666,32 @@ namespace PostBot
             {
                 Console.Write($"retry failed with message:{ex.Message}. retrying again ...");
                 await RetrySendAudio(file, k, duration, messageCategory);
+            }
+        }
+
+
+        private static async Task RetrySendVideo(FileInfo file, int k, TimeSpan duration, MessageCategory messageCategory)
+        {
+            try
+            {
+                Bot = new TelegramBotClient(ApiToken);
+                var me = Bot.GetMeAsync().Result;
+                Bot.StartReceiving();
+                Thread.Sleep(5000);
+                var retryStream = File.Open(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var inputFile = new InputOnlineFile(retryStream);
+                inputFile.FileName = file.FullName.Split('\\').Last();
+                var title = inputFile.FileName + Environment.NewLine + "#" + messageCategory;
+                title += Environment.NewLine + "#" + messageCategory + "No" + k;
+
+                var result = await Bot.SendVideoAsync(ChatId, inputFile, duration: Convert.ToInt32(Math.Truncate(duration.TotalSeconds)), caption: inputFile.FileName);
+                Utility.AppendToJsonFile(result, messageCategory);
+
+            }
+            catch (Exception ex)
+            {
+                Console.Write($"retry failed with message:{ex.Message}. retrying again ...");
+                await RetrySendVideo(file, k, duration, messageCategory);
             }
         }
 

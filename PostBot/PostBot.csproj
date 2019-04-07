@@ -94,7 +94,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="JsonMessages\EngAMin.json" />
-    <None Include="JsonMessages\EngvidEmma.json" />
+    <None Include="JsonMessages\Engvid.json" />
     <None Include="JsonMessages\EslPodMessages.json" />
     <None Include="obj\Debug\BTCPostBot.csprojResolveAssemblyReference.cache" />
     <None Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
