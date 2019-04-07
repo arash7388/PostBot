@@ -89,58 +89,14 @@ namespace PostBot
             if (ConfigurationManager.AppSettings["EslPodEnabled"].ToSafeBool() || AllJobsEnabled)
                 EslPodJob.Start();
 
+            if (ConfigurationManager.AppSettings["NewsInLevelsEnabled"].ToSafeBool() || AllJobsEnabled)
+                NewsInLevelsJob.Start();
+
             Console.ReadKey();
             
         }
 
-        private static void GetNewsInLevels()
-        {
-            try
-            {
-                string html = Utility.GetHtml("https://www.newsinlevels.com");
-                HtmlDocument htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(html);
-
-                var firstpageMainContent = htmlDoc.DocumentNode.SelectNodes(@"//div[contains(@class,'main-content')]");
-                var topEntry = firstpageMainContent.Descendants().FirstOrDefault(a => a.HasClass("highlighted"));
-                var imgwrap = topEntry.Descendants().FirstOrDefault(a => a.HasClass("img-wrap"));
-                var anchor = imgwrap.Descendants("a").FirstOrDefault();
-                var href = anchor.Attributes.FirstOrDefault(a => a.Name == "href").Value;
-
-                var image = imgwrap.Descendants("img").FirstOrDefault();
-                var imageSrc = image.Attributes.FirstOrDefault(a => a.Name == "src").Value;
-
-                (string title, string conent) level1 = GetArticleContent(href);
-                (string title, string conent) level2 = GetArticleContent(href.Replace("level-1", "level-2"));
-                (string title, string conent) level3 = GetArticleContent(href.Replace("level-1", "level-3"));
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-
-        public static (string title, string conent) GetArticleContent(string href)
-        {
-            string html;
-            HtmlDocument htmlDoc;
-            html = Utility.GetHtml(href);
-            htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(html);
-
-            var mainContent = htmlDoc.DocumentNode.SelectNodes(@"//div[contains(@class,'main-content')]");
-            var titleText = mainContent.Descendants("div").FirstOrDefault(a => a.HasClass("article-title")).Descendants("h2").FirstOrDefault().InnerText;
-            var nContent = mainContent.Descendants().FirstOrDefault(a => a.Id == "nContent");
-
-            string articleText = "";
-            foreach (HtmlNode p in nContent.Descendants("p"))
-            {
-                articleText += p.InnerText + "\n";
-            }
-            var result = (title: titleText, conent: articleText);
-            return result;
-        }
+        
 
         //getting url of all entries ...
         public static void ListenAMin()

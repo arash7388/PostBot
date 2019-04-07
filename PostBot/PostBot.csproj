@@ -69,11 +69,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseJob.cs" />
     <Compile Include="EslPodJob.cs" />
     <Compile Include="Engvid.cs" />
     <Compile Include="Instagram.cs" />
     <Compile Include="LearnEngTodayJob.cs" />
     <Compile Include="CommonMistakesJob.cs" />
+    <Compile Include="NewsInLevelsJob.cs" />
     <Compile Include="PhotoWithTextJob.cs" />
     <Compile Include="CambridgeParser.cs" />
     <Compile Include="EslFastJob.cs" />

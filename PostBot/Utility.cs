@@ -53,7 +53,7 @@ namespace PostBot
 
         public static async Task SendPhotoToChannel(long chatId, string path, string caption)
         {
-            if (path.Contains("http:"))
+            if (path.Contains("http:") || path.Contains("https:"))
                 await Bot.SendPhotoAsync(chatId, path, caption);
             else
 
